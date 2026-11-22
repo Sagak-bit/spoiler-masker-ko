@@ -1,0 +1,33 @@
+{
+ "run": "m1_ssc_s42",
+ "key": "m1",
+ "context": 1,
+ "max_len": 128,
+ "pool": "cls",
+ "genre": false,
+ "dfiif": false,
+ "position": false,
+ "gru": false,
+ "cls_id": 2,
+ "sep_id": 3,
+ "pad_id": 0,
+ "unk_id": 1,
+ "feat_mean": null,
+ "feat_std": null,
+ "thresholds": {
+  "strict": 0.735641598701477,
+  "lenient": 0.12085322290658951
+ },
+ "genre_ko": {
+  "children": "아동",
+  "comics, graphic": "만화",
+  "fantasy, paranormal": "판타지",
+  "fiction": "소설",
+  "history, historical fiction, biography": "역사",
+  "mystery, thriller, crime": "미스터리",
+  "non-fiction": "논픽션",
+  "poetry": "시",
+  "romance": "로맨스",
+  "young-adult": "청소년"
+ }
+}

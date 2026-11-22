@@ -1,0 +1,43 @@
+{
+ "run": "m5_full_s42",
+ "key": "m5",
+ "context": 5,
+ "max_len": 256,
+ "pool": "sep",
+ "genre": true,
+ "dfiif": true,
+ "position": true,
+ "gru": true,
+ "cls_id": 2,
+ "sep_id": 3,
+ "pad_id": 0,
+ "unk_id": 1,
+ "feat_mean": [
+  1.3714020252227783,
+  0.6354364156723022,
+  0.8968849182128906,
+  1.511401653289795
+ ],
+ "feat_std": [
+  1.4532139301300049,
+  0.6401926875114441,
+  0.9288034439086914,
+  0.6594892740249634
+ ],
+ "thresholds": {
+  "strict": 0.8175744414329529,
+  "lenient": 0.0792103186249733
+ },
+ "genre_ko": {
+  "children": "아동",
+  "comics, graphic": "만화",
+  "fantasy, paranormal": "판타지",
+  "fiction": "소설",
+  "history, historical fiction, biography": "역사",
+  "mystery, thriller, crime": "미스터리",
+  "non-fiction": "논픽션",
+  "poetry": "시",
+  "romance": "로맨스",
+  "young-adult": "청소년"
+ }
+}
