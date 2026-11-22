@@ -3,6 +3,7 @@
    controls react instantly. Thresholds come from /api/meta (chosen on validation, as in the report). */
 "use strict";
 
+const NAME = (k) => ({ m5: "CLOAK", m1: "비교 모델" }[k] || k);
 const $ = (s, el = document) => el.querySelector(s);
 const h = (tag, attrs = {}, ...kids) => {
   const el = document.createElement(tag);
@@ -43,7 +44,7 @@ function maskBlock(parts, open, onToggle) {
 const S = {
   meta: null, feed: null, ready: false,
   run: null,              // current result in "직접 가려 보기": {sentences, p:{m5,m1}, tags, en, source, ms}
-  strength: 100,          // 0 = 넉넉(val recall 0.8), 100 = 엄격(val best F1); in between: logit interpolation
+  strength: 100,          // 0 = Recall 우선(val recall 0.8), 100 = Precision 우선(val best F1); in between: logit interpolation
   revealed: new Set(), exampleKey: null,
   // method: "none" (show everything) | "old" (fold any author-tagged review) | "model" (mask sentences)
   site: { book: 0, method: "model", mode: "strict", tags: false, revealed: new Set(), openOld: new Set(), openEn: new Set() },
@@ -103,14 +104,14 @@ function browserApi() {
     const cur = Object.values(progress)[0];
     if (cur) {
       st.className = "status loading";
-      txt.textContent = cur.phase === "init" ? `${cur.key.toUpperCase()} 준비 중…`
-        : `${cur.key.toUpperCase()} 받는 중 ${cur.total ? Math.round(100 * cur.loaded / cur.total) + "%" : (cur.loaded / 1e6).toFixed(0) + " MB"}`;
+      txt.textContent = cur.phase === "init" ? `${NAME(cur.key)} 준비 중…`
+        : `${NAME(cur.key)} 받는 중 ${cur.total ? Math.round(100 * cur.loaded / cur.total) + "%" : (cur.loaded / 1e6).toFixed(0) + " MB"}`;
       const btn = $("#run");
       if (btn.disabled && S.busy) btn.lastChild.textContent = txt.textContent;
       return;
     }
     st.className = loaded.size ? "status ready" : "status idle";
-    txt.textContent = loaded.size ? `${[...loaded].map((k) => k.toUpperCase()).join("·")} 준비됨 (브라우저)` : "브라우저에서 실행";
+    txt.textContent = loaded.size ? `${[...loaded].map(NAME).join("·")} 준비됨 (브라우저)` : "브라우저에서 실행";
     st.title = loaded.size ? "모델이 이 브라우저 안에서 돌아갑니다. 입력은 어디로도 보내지 않습니다."
       : `처음 [스포일러 가리기]를 누를 때 모델(약 ${cfg.models.m5.mb} MB)을 한 번 받습니다. 다음부터는 브라우저에 저장된 것을 씁니다.`;
   };
@@ -172,7 +173,7 @@ async function pollHealth() {
     if (r.error) { st.className = "status error"; txt.textContent = "모델 오류"; st.title = r.error; return; }
     if (r.ready) {
       S.ready = true; st.className = "status ready";
-      txt.textContent = `${r.models.map((m) => m.toUpperCase()).join("·")} 준비됨`;
+      txt.textContent = `${r.models.map(NAME).join("·")} 준비됨`;
       st.title = "이 컴퓨터의 CPU에서 추론합니다";
       $("#run").disabled = false;
       return;
@@ -326,22 +327,22 @@ function hideError() { $("#error").hidden = true; }
 function strengthControl() {
   const wrap = h("div", { class: "strength-inner", style: "display:contents" });
   const seg = h("div", { class: "seg", role: "radiogroup", "aria-label": "가림 강도" });
-  // the slider runs left = 엄격 (fewer masks) to right = 넉넉 (more masks), the same order as the buttons
+  // the slider runs left = Precision 우선 (fewer masks) to right = Recall 우선 (more masks), the same order as the buttons
   const range = h("input", { type: "range", min: "0", max: "100", step: "1", value: String(100 - S.strength), "aria-label": "가림 강도 세부 조절" });
   const note = h("div", { class: "strength-note" });
   const setS = (v) => { S.strength = v; range.value = String(100 - v); renderResult(); };
-  for (const [label, v] of [["엄격", 100], ["넉넉", 0]]) {
+  for (const [label, v] of [["Precision 우선 · 덜 가림", 100], ["Recall 우선 · 더 가림", 0]]) {
     seg.append(h("button", { type: "button", role: "radio", "data-v": String(v), "aria-checked": String(S.strength === v), onclick: () => setS(v) }, label));
   }
   range.addEventListener("input", () => setS(100 - +range.value));
   wrap.append(seg, h("div", { class: "range-wrap" }, range,
-    h("div", { class: "range-scale" }, h("span", { text: "엄격: 확실한 것만 가림" }), h("span", { text: "넉넉: 스포일러를 더 많이 가림" }))), note);
+    h("div", { class: "range-scale" }, h("span", { text: "확실한 스포일러만 가림" }), h("span", { text: "스포일러를 놓치지 않게 더 가림" }))), note);
   wrap.update = () => {
     for (const b of seg.children) b.setAttribute("aria-checked", String(+b.dataset.v === S.strength));
     const m5 = threshold("m5", S.strength);
-    const parts = [h("span", {}, "M5 임계값 ", h("b", { text: m5.toFixed(3) }))];
+    const parts = [h("span", {}, "임계값 ", h("b", { text: m5.toFixed(3) }))];
     if (S.strength === 100) parts.push(" · val에서 F1이 가장 높은 값 (test에서 스포일러 문장의 ", h("b", { text: pct(S.meta.models.m5.test_recall_strict) }), "를 가림)");
-    else if (S.strength === 0) parts.push(" · val 재현율 0.8이 되는 값 (test에서 비스포일러 문장의 ", h("b", { text: pct(S.meta.models.m5.test_overmask_lenient, 1) }), "도 함께 가림)");
+    else if (S.strength === 0) parts.push(" · val recall 0.8이 되는 값 (test에서 비스포일러 문장의 ", h("b", { text: pct(S.meta.models.m5.test_overmask_lenient, 1) }), "도 함께 가림)");
     else parts.push(" · 두 값 사이");
     note.replaceChildren(...parts);
   };
@@ -374,7 +375,7 @@ function renderResult() {
   else sum.replaceChildren(`${sentences.length}문장 모두 그대로 보여요 `, h("span", { class: "hint", text: "(가린 문장 없음)" }));
   const meta = [S.run.source];
   if (S.run.ms !== null) meta.push(S.run.ms < 100 ? "0.1초 미만" : `${(S.run.ms / 1000).toFixed(1)}초`);
-  if (cmp) meta.push(`M1이었다면 ${m1.filter(Boolean).length}문장`);
+  if (cmp) meta.push(`문장 하나만 보는 모델이었다면 ${m1.filter(Boolean).length}문장`);
   $("#meta-line").textContent = meta.join(" · ");
 
   // notices: the input changed since this result / the text is mostly not Korean
@@ -414,8 +415,8 @@ function renderResult() {
       else if (m5[i]) { over++; flags.push(h("span", { class: "flag over", text: "과잉" })); }
       if (tags[i]) flags.unshift(h("span", { class: "flag tag", text: "작성자 태그" }));
     }
-    const bars = [bar("m5", "M5", S.run.p.m5[i], m5[i])];
-    if (cmp) bars.push(bar("m1", "M1", S.run.p.m1[i], m1[i]));
+    const bars = [bar("m5", "CLOAK", S.run.p.m5[i], m5[i])];
+    if (cmp) bars.push(bar("m1", "1문장", S.run.p.m1[i], m1[i]));
     const row = h("li", { class: "row" },
       h("span", { class: "idx", text: String(i + 1) }),
       h("div", { class: "txt" }, s, flags.length ? h("span", { class: "flags" }, flags) : null),
@@ -427,9 +428,9 @@ function renderResult() {
 
   // legend
   const lg = $("#legend");
-  const items = [h("span", {}, h("i", { style: "background:var(--blue)" }), "M5 확률(임계값 이상 = 가림)"),
+  const items = [h("span", {}, h("i", { style: "background:var(--blue)" }), "CLOAK 확률(임계값 이상 = 가림)"),
     h("span", {}, h("i", { class: "thr-i" }), "임계값")];
-  if (cmp) items.splice(1, 0, h("span", {}, h("i", { style: "background:var(--m1)" }), "M1 확률(문장 하나만 봄)"));
+  if (cmp) items.splice(1, 0, h("span", {}, h("i", { style: "background:var(--m1)" }), "문장 하나만 보는 모델의 확률"));
   if (showTags) items.push(h("span", {}, `작성자 태그 ${tags.filter(Boolean).length}문장: 맞게 가림 ${hit} · 놓침 ${miss} · 과잉 ${over}`));
   lg.replaceChildren(...items);
 }
@@ -487,8 +488,8 @@ function buildSite() {
   }
   const m = S.meta.models.m5;
   $("#site-foot").textContent = `책 고르는 규칙: ${S.feed.rule} 원 데이터에는 책 제목이 없어(Goodreads 책 ID만 있음) 제목 대신 번호로 표시했습니다. `
-    + `가림 강도: 엄격 = val F1 최대 임계값(${m.strict.toFixed(3)}), 넉넉 = val 재현율 0.8 임계값(${m.lenient.toFixed(3)}). `
-    + `M5의 test 문장 PR-AUC는 ${m.test_pr_auc.toFixed(3)}(seed 42)이고, 엄격 설정에서 test 스포일러 문장의 ${pct(m.test_recall_strict)}를 가립니다. `
+    + `가림 강도: Precision 우선 = val F1 최대 임계값(${m.strict.toFixed(3)}), Recall 우선 = val recall 0.8 임계값(${m.lenient.toFixed(3)}). `
+    + `CLOAK의 test 문장 PR-AUC는 ${m.test_pr_auc.toFixed(3)}(seed 42)이고, Precision 우선 설정에서 test 스포일러 문장의 ${pct(m.test_recall_strict)}를 가립니다. `
     + `"리뷰 통째로 접기"는 작성자가 스포일러 태그를 하나라도 붙인 리뷰를 전부 접는 기존 사이트의 방식입니다.`;
   openBook(0);
 }

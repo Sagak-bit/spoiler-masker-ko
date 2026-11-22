@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>스포일러 가리개</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b3a78'/%3E%3Crect x='7' y='10' width='18' height='4' rx='2' fill='%23fff'/%3E%3Crect x='7' y='18' width='12' height='4' rx='2' fill='%23e69f00'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="static/app.css?v=8923560b67">
+<link rel="stylesheet" href="static/app.css?v=637266e7bc">
 </head>
 <body>
 <header class="topbar">
@@ -63,7 +63,7 @@
           <div class="sub-head">
             <h3 class="sub-title">문장별 판단</h3>
             <div class="toggles">
-              <label class="switch"><input type="checkbox" id="cmp-m1"><span></span>문장 하나만 보는 모델(M1)과 비교</label>
+              <label class="switch"><input type="checkbox" id="cmp-m1"><span></span>문장 하나만 보는 모델과 비교</label>
               <label class="switch" id="tags-wrap" hidden><input type="checkbox" id="show-tags" checked><span></span>작성자 태그 표시</label>
             </div>
           </div>
@@ -77,7 +77,7 @@
   <!-- ============================================================ 리뷰 사이트 목업 -->
   <section id="view-site" role="tabpanel" aria-labelledby="tab-site" class="view site" hidden>
     <div class="site-intro">
-      <p><b>책갈피</b>는 이 데모를 위해 만든 가상의 책 리뷰 사이트입니다. 리뷰는 Goodreads test 리뷰를 한국어로 번역한 것이고, 가림은 모델(M5)이 문장마다 낸 확률로 정합니다.</p>
+      <p><b>책갈피</b>는 이 데모를 위해 만든 가상의 책 리뷰 사이트입니다. 리뷰는 Goodreads test 리뷰를 한국어로 번역한 것이고, 가림은 CLOAK가 문장마다 낸 확률로 정합니다.</p>
     </div>
     <div class="browser">
       <div class="browser-bar" aria-hidden="true">
@@ -96,8 +96,8 @@
               </div></div>
             <div class="ctl" id="site-mode-wrap"><span class="ctl-label" id="lbl-mode">강도</span>
               <div class="seg" id="site-mode" role="radiogroup" aria-labelledby="lbl-mode">
-                <button role="radio" data-mode="strict" aria-checked="true">엄격</button>
-                <button role="radio" data-mode="lenient" aria-checked="false">넉넉</button>
+                <button role="radio" data-mode="strict" aria-checked="true" title="확실한 스포일러만 가림">Precision 우선</button>
+                <button role="radio" data-mode="lenient" aria-checked="false" title="스포일러를 놓치지 않게 더 많이 가림">Recall 우선</button>
               </div></div>
             <label class="switch light"><input type="checkbox" id="site-tags"><span></span>작성자 태그 보기</label>
           </div>
@@ -113,10 +113,10 @@
 </main>
 
 <footer class="page-foot">
-  CAS2250 인공지능개론 팀 프로젝트 · 모델은 번역한 Goodreads 리뷰로 학습한 KoELECTRA + 리뷰 BiGRU(M5). <span id="where">이 컴퓨터에서</span> 직접 추론하며 입력은 저장하지 않습니다.
+  CAS2250 인공지능개론 팀 프로젝트 · 모델은 번역한 Goodreads 리뷰로 학습한 CLOAK(KoELECTRA + 리뷰 BiGRU). <span id="where">이 컴퓨터에서</span> 직접 추론하며 입력은 저장하지 않습니다.
 </footer>
 
-<script src="static/config.js?v=8923560b67"></script>
-<script src="static/app.js?v=8923560b67" defer></script>
+<script src="static/config.js?v=637266e7bc"></script>
+<script src="static/app.js?v=637266e7bc" defer></script>
 </body>
 </html>

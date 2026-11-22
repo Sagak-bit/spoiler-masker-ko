@@ -1,6 +1,6 @@
 window.SPOILER_CONFIG = {
- "version": "8923560b67",
- "cache": "spoiler-models-892356",
+ "version": "637266e7bc",
+ "cache": "spoiler-models-637266",
  "vocab": "data/vocab.txt",
  "iif": "data/iif.json",
  "models": {
