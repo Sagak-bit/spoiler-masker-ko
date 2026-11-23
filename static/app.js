@@ -524,29 +524,58 @@ function renderBook() {
     r.tags.forEach((t, j) => { if (t) { tagSents++; if (m[j]) caught++; } });
   }
 
+  // product area, laid out like an online bookstore's book page (cover | title, rating, info table | buy box)
+  const crumbs = h("div", { class: "crumbs", "aria-hidden": "true" },
+    h("span", { text: "국내도서" }), h("span", { text: b.genres_ko[0] || "도서" }), h("span", { text: b.name }));
   const head = h("div", { class: "book-head" },
-    h("div", { class: "cover", style: `background:${coverBg(b.genres)}`, "aria-hidden": "true" },
-      h("div", { class: "c-genre", text: b.genres_ko.join(" · ") }), h("div", { class: "c-line" }), h("div", { class: "c-name", text: b.name })),
-    h("div", {},
-      h("div", { class: "gen" }, b.genres_ko.map((g) => h("span", { text: g }))),
+    h("div", { class: "cover-wrap" },
+      h("div", { class: "cover", style: `background:${coverBg(b.genres)}`, "aria-hidden": "true" },
+        h("div", { class: "c-genre", text: b.genres_ko.join(" · ") }), h("div", { class: "c-line" }), h("div", { class: "c-name", text: b.name }))),
+    h("div", { class: "book-info" },
+      h("div", { class: "gen" }, h("span", { class: "badge-best", text: "리뷰 많은 책" }), b.genres_ko.map((g) => h("span", { text: g }))),
       h("h2", { text: b.name }),
-      h("div", { class: "book-stats" },
-        h("span", {}, h("b", { text: avg.toFixed(1) }), " 평균 별점"),
-        h("span", {}, h("b", { text: String(b.reviews.length) }), " 리뷰"),
-        h("span", {}, h("b", { text: String(nTagged) }), " 스포일러 태그가 있는 리뷰"))));
+      h("div", { class: "book-sub", text: "원 데이터에 제목이 없어 번호로 표시한 가상 도서" }),
+      h("div", { class: "book-rate" }, stars(Math.round(avg)), h("b", { text: avg.toFixed(1) }),
+        h("span", { class: "sep" }), h("span", {}, "리뷰 ", h("b", { text: String(b.reviews.length) }), "건")),
+      h("dl", { class: "info-table" },
+        h("dt", { text: "분야" }), h("dd", { text: b.genres_ko.join(", ") }),
+        h("dt", { text: "리뷰" }), h("dd", { text: `${b.reviews.length}건 (그중 작성자가 스포일러 태그를 붙인 리뷰 ${nTagged}건)` }),
+        h("dt", { text: "출처" }), h("dd", { text: "Goodreads test 리뷰를 한국어로 기계 번역" }))),
+    h("div", { class: "buy-box", "aria-hidden": "true" },
+      h("div", { class: "buy-note", text: "판매하지 않는 가상 도서입니다" }),
+      h("span", { class: "btn-like ghost", text: "♡" }), h("span", { class: "btn-like line", text: "장바구니" }), h("span", { class: "btn-like solid", text: "바로구매" })));
+
+  const ptabs = h("div", { class: "ptabs", "aria-hidden": "true" },
+    h("span", { text: "상품정보" }), h("span", { class: "on" }, "리뷰 ", h("b", { text: `(${b.reviews.length})` })), h("span", { text: "교환/반품/품절" }));
+
+  // review summary: average + star distribution (from the reviews' own ratings)
+  const dist = [5, 4, 3, 2, 1].map((s) => ({ s, n: b.reviews.filter((r) => Math.round(r.rating || 0) === s).length }));
+  const summary = h("div", { class: "rv-summary" },
+    h("div", { class: "score" }, h("div", { class: "score-num", text: avg.toFixed(1) }), stars(Math.round(avg)),
+      h("div", { class: "score-n", text: `${b.reviews.length}명 참여` })),
+    h("div", { class: "dist" }, dist.map(({ s, n }) => h("div", { class: "dist-row" },
+      h("span", { text: `${s}점` }), h("span", { class: "dist-track" }, h("i", { style: `width:${pct(n / b.reviews.length)}` })),
+      h("span", { class: "dist-n", text: String(n) })))),
+    $("#site-controls"));
 
   const meter = h("div", { class: "page-meter" },
     h("span", {}, "이 페이지 ", h("b", { text: `${total}문장` }), " 중"),
-    h("span", { class: S.site.method === "model" ? "cur" : null }, "문장만 가리기 ", h("b", { style: "color:#b5452f", text: `${modelHidden}문장` })),
+    h("span", { class: S.site.method === "model" ? "cur" : null }, "문장만 가리기 ", h("b", { class: "acc", text: `${modelHidden}문장` })),
     h("span", { class: S.site.method === "old" ? "cur" : null }, "리뷰 통째로 접기 ", h("b", { text: `${oldHidden}문장` })),
     h("span", { class: "meter-bar", title: "왼쪽: 모델이 가린 비율, 회색 전체: 기존 방식이 숨긴 비율", "aria-hidden": "true" },
-      h("i", { style: `width:${pct(modelHidden / total)};background:#b5452f` }),
-      h("i", { style: `width:${pct(Math.max(0, oldHidden - modelHidden) / total)};background:#d8cbb7` })),
+      h("i", { class: "m", style: `width:${pct(modelHidden / total)}` }),
+      h("i", { class: "o", style: `width:${pct(Math.max(0, oldHidden - modelHidden) / total)}` })),
     S.site.tags ? h("span", {}, "작성자 태그 ", h("b", { text: `${tagSents}문장` }), ` 중 ${caught}문장 가림`) : null);
+
+  const sortbar = h("div", { class: "rv-sort" },
+    h("span", { class: "on", "aria-hidden": "true", text: "최신순" }), h("span", { "aria-hidden": "true", text: "별점순" }),
+    h("span", { class: "rv-sort-note", text: S.site.method === "model" ? "스포일러 문장은 흐리게 가려져 있어요. 눌러서 펼칠 수 있어요." : "" }));
 
   const list = h("div", { class: "reviews" });
   b.reviews.forEach((r, ri) => list.append(reviewCard(r, ri)));
-  page.replaceChildren(head, meter, list);
+  const section = h("section", { class: "rv-section", "aria-label": "리뷰" },
+    h("h3", { class: "rv-title" }, "책갈피 리뷰 ", h("span", { text: `(${b.reviews.length})` })), summary, meter, sortbar, list);
+  page.replaceChildren(crumbs, head, ptabs, section);
 }
 
 function stars(n) {
@@ -555,14 +584,22 @@ function stars(n) {
   return out;
 }
 
+/* small chip in the review header when the model hides something in this review */
+function method_chip(r) {
+  if (S.site.method !== "model") return null;
+  const n = modelMasked(r).filter(Boolean).length;
+  return n ? h("span", { class: "rv-chip", text: "스포일러 가림" }) : null;
+}
+
 function reviewCard(r, ri) {
   const key = (j) => `${r.id}:${j}`;
   const tagged = r.tags.some(Boolean);
   const card = h("article", { class: "review" },
     h("div", { class: "rv-head" },
-      h("span", { class: "avatar", style: `background:${AVATAR[ri % AVATAR.length]}`, text: r.reader.slice(-1) }),
-      h("span", { class: "rv-name", text: r.reader }), r.rating ? stars(r.rating) : null,
-      tagged && S.site.tags ? h("span", { class: "rv-badge", text: "작성자가 스포일러 태그를 붙인 리뷰" }) : null));
+      r.rating ? stars(r.rating) : null, r.rating ? h("span", { class: "rv-score", text: `${r.rating}점` }) : null,
+      h("span", { class: "rv-sep", "aria-hidden": "true" }), h("span", { class: "rv-name", text: r.reader }),
+      method_chip(r),
+      tagged && S.site.tags ? h("span", { class: "rv-badge", text: "작성자 스포일러 태그" }) : null));
 
   // 기존 방식: the whole review is folded if the author tagged anything
   const method = S.site.method;
