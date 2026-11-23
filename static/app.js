@@ -204,7 +204,7 @@ function setupTabs() {
       show(n.id); n.focus();
     });
   });
-  show(location.hash === "#site" ? "tab-site" : "tab-try");
+  show(location.hash === "#try" ? "tab-try" : "tab-site");      // the review-site view is the default
 }
 
 /* ================================================================== 직접 가려 보기 */

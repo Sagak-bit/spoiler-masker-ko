@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>스포일러 가리개</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b3a78'/%3E%3Crect x='7' y='10' width='18' height='4' rx='2' fill='%23fff'/%3E%3Crect x='7' y='18' width='12' height='4' rx='2' fill='%23e69f00'/%3E%3C/svg%3E">
-<link rel="stylesheet" href="static/app.css?v=b76db3c160">
+<link rel="stylesheet" href="static/app.css?v=f02c7191b5">
 </head>
 <body>
 <header class="topbar">
@@ -15,15 +15,15 @@
     <span class="brand-sub">리뷰에서 스포일러 문장만 가리는 한국어 모델</span>
   </div>
   <nav class="tabs" role="tablist" aria-label="화면 선택">
-    <button role="tab" id="tab-try" aria-controls="view-try" aria-selected="true">직접 가려 보기</button>
-    <button role="tab" id="tab-site" aria-controls="view-site" aria-selected="false">리뷰 사이트에서 보기</button>
+    <button role="tab" id="tab-try" aria-controls="view-try" aria-selected="false">직접 가려 보기</button>
+    <button role="tab" id="tab-site" aria-controls="view-site" aria-selected="true">리뷰 사이트에서 보기</button>
   </nav>
   <div class="status" id="status" aria-live="polite"><span class="dot"></span><span class="status-text">모델 확인 중…</span></div>
 </header>
 
 <main>
   <!-- ============================================================ 직접 가려 보기 -->
-  <section id="view-try" role="tabpanel" aria-labelledby="tab-try" class="view try">
+  <section id="view-try" role="tabpanel" aria-labelledby="tab-try" class="view try" hidden>
     <div class="try-grid">
       <div class="panel input-panel">
         <h2 class="panel-title">리뷰 입력</h2>
@@ -75,7 +75,7 @@
   </section>
 
   <!-- ============================================================ 리뷰 사이트 목업 -->
-  <section id="view-site" role="tabpanel" aria-labelledby="tab-site" class="view site" hidden>
+  <section id="view-site" role="tabpanel" aria-labelledby="tab-site" class="view site">
     <div class="site-intro">
       <p><b>책갈피</b>는 이 데모를 위해 만든 가상의 책 리뷰 사이트입니다. 리뷰는 Goodreads test 리뷰를 한국어로 번역한 것이고, 가림은 CLOAK가 문장마다 낸 확률로 정합니다.</p>
     </div>
@@ -131,7 +131,7 @@
   CAS2250 인공지능개론 팀 프로젝트 · 모델은 번역한 Goodreads 리뷰로 학습한 CLOAK(KoELECTRA + 리뷰 BiGRU). <span id="where">이 컴퓨터에서</span> 직접 추론하며 입력은 저장하지 않습니다.
 </footer>
 
-<script src="static/config.js?v=b76db3c160"></script>
-<script src="static/app.js?v=b76db3c160" defer></script>
+<script src="static/config.js?v=f02c7191b5"></script>
+<script src="static/app.js?v=f02c7191b5" defer></script>
 </body>
 </html>
